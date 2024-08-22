@@ -1,0 +1,88 @@
+# .env.local
+
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=0000
+DB_PORT=3306
+DB_DATABASE=mytest
+
+JWT_SECRET=9da8b3e5e7d3a8b60cf096e74ad9a267b39bee3c8657ddc4a832c91de2bc8d029b51d699b534523ac0437787440f7ec0721b2f9c8e42f335654af957c5732412
+
+# 데이터베이스
+
+DROP DATABASE IF EXISTS mytest;
+CREATE DATABASE mytest;
+use mytest;
+
+CREATE TABLE tbl_users(
+   email varchar(30) primary key,
+   pw varchar(200) not null,
+   question int not null check (question IN(1, 2, 3)),
+   answer varchar(200) not null,
+   created_date datetime default now() not null,
+   updated_date datetime default now() not null,
+   profile_url varchar(200) default '/profile.jpg',
+   cover_url varchar(200) default '/cover.jpg'
+);
+
+insert into tbl_users
+(email, pw, question, answer)
+values ('test@test.com', '000000', 1, '경기도');
+
+create table tbl_careers (
+  id int auto_increment primary key,
+  email varchar(30) not null references tbl_users(email),
+  company varchar(200) not null,
+  position varchar(200) not null,
+  start_date date not null,
+  end_date date 
+);
+
+insert into tbl_careers 
+(email, company, position, start_date, end_date) 
+values ('test1@test.com', '그린컴퓨터 아카데미', '교육부' , str_to_date('2020-01-01', '%Y-%m-%d'), str_to_date('2020-12-31', '%Y-%m-%d'));
+
+insert into tbl_careers 
+(email, company, position, start_date, end_date) 
+values ('test2@test.com', '스터디카페', '총무' , str_to_date('2020-01-01', '%Y-%m-%d'), str_to_date('2020-12-31', '%Y-%m-%d'));
+
+CREATE TABLE tbl_activities (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    content TEXT NOT NULL,
+    writer_email VARCHAR(30),
+    created_date DATETIME DEFAULT NOW() NOT NULL,
+    updated_date DATETIME DEFAULT NOW() ON UPDATE NOW() NOT NULL,
+    FOREIGN KEY (writer_email) REFERENCES tbl_users(email)
+);
+
+INSERT INTO tbl_activities (title, content, writer_email) 
+VALUES 
+('제주도 여행후기', '제주도 여행을 놀러갔는데 너무 재미있었다', 'test@test.com'),
+('아플때 팁', '아프기 전에 예방하는 습관이 중요합니다', 'test@test.com'),
+('부산 여행 후기', '부산은 바다가 좋아요', 'test@test.com'),
+('강아지가 아플때', '강아지가 지금 아픈데 어떡해야하나요?', 'test@test.com'),
+('일본 여행 후기', '일본에 놀러갔다 왔어요', 'test@test.com');
+
+CREATE TABLE tbl_activity_like (
+    activity_id INT,
+    email VARCHAR(30),
+    PRIMARY KEY (activity_id, email),
+    FOREIGN KEY (activity_id) REFERENCES tbl_activities(id),
+    FOREIGN KEY (email) REFERENCES tbl_users(email)
+);
+
+ALTER TABLE tbl_activities
+ADD activity_view INT DEFAULT 0;
+
+CREATE TABLE tbl_activity_img (
+    activity_id INT,
+    img_url VARCHAR(500),
+    PRIMARY KEY (activity_id, img_url),
+    FOREIGN KEY (activity_id) REFERENCES tbl_activities(id)
+);
+
+select * from tbl_users;
+select * from tbl_careers where email='test1@test.com';
+select * from tbl_activities;
+select * from tbl_careers;
